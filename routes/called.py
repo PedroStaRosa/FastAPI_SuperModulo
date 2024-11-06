@@ -1,9 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
 from sqlmodel import Session, select
 from database import get_session
 from models.called import Calleds
 from schemas.calleds import CalledCreate
 from datetime import datetime
+from middleware import create_token
 
 router = APIRouter()
 
@@ -23,7 +25,7 @@ def get_called(called_id: int, session: Session =Depends(get_session)):
     return called
 
 @router.post("/called")
-def get_user(called: CalledCreate, session: Session =Depends(get_session)):
+def get_called(called: CalledCreate, session: Session =Depends(get_session)):
 
     called_db = Calleds(**called.model_dump())
 
@@ -37,7 +39,7 @@ def get_user(called: CalledCreate, session: Session =Depends(get_session)):
     }
 
 @router.put("/called/{called_id}")
-def put_user(called_id: int , called: CalledCreate, session: Session =Depends(get_session)):
+def put_called(called_id: int , called: CalledCreate, session: Session =Depends(get_session)):
     called_db = session.get(Calleds, called_id)
    
     if not called_id:
@@ -62,3 +64,11 @@ def delete_called(called_id: int, session: Session = Depends(get_session)):
     session.commit()
 
     return {'message': "Called deleted!"}
+
+@router.post("/called_create_token")
+def get_called(email: dict):
+
+    token = create_token(email)
+    
+    return {"user_token": token}
+
